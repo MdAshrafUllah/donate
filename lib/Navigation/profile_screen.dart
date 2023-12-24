@@ -1,4 +1,9 @@
+import 'dart:io';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -7,7 +12,54 @@ class ProfileScreen extends StatefulWidget {
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
+String currentPic = ' ';
+String bio = '';
+String name = '';
+
 class _ProfileScreenState extends State<ProfileScreen> {
+
+  FirebaseAuth auth = FirebaseAuth.instance;
+  User? user;
+  bool isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchData();
+  }
+
+  Future<void> fetchData() async {
+    try {
+      if (auth.currentUser != null) {
+        setState(() {
+          isLoading = true;
+        });
+
+        user = auth.currentUser;
+        final querySnapshot = await FirebaseFirestore.instance
+            .collection('users')
+            .where('email', isEqualTo: user?.email)
+            .get();
+
+        for (var doc in querySnapshot.docs) {
+          setState(() {
+            currentPic = doc["profileImage"];
+            bio = doc['bio'];
+            name = doc['name'];
+          });
+        }
+
+        setState(() {
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -22,8 +74,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 width: size.width / 4.5,
                 height: size.height / 9.5,
                 decoration: ShapeDecoration(
-                  image: const DecorationImage(
-                    image: NetworkImage("https://via.placeholder.com/80x80"),
+                  image: DecorationImage(
+                    image: NetworkImage(currentPic),
                     fit: BoxFit.fill,
                   ),
                   shape: RoundedRectangleBorder(
@@ -43,7 +95,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: Column(
                   children: [
                     Text(
-                      'Malek Afsar',
+                      name,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Color(0xFF1E1E1E),
@@ -53,7 +105,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     SizedBox(height: size.height / 70),
                     Text(
-                      'Account type',
+                      bio,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Color(0xFF1E1E1E),
@@ -186,7 +238,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           color: Color(0xFF39b54a),
                         ),
                         TextButton(
-                          onPressed: () {},
+                          onPressed: () async {
+                            // setStatus("Offline");
+                            Future<void> _deleteAppDir() async {
+                              Directory appDocDir =
+                              await getApplicationDocumentsDirectory();
+
+                              if (appDocDir.existsSync()) {
+                                appDocDir.deleteSync(recursive: true);
+                              }
+                            }
+
+                            await FirebaseAuth.instance.signOut();
+                            Navigator.pushNamed(context, '/');
+                          },
                           child: Text('Logout',
                               style: TextStyle(
                                   fontSize: size.width / 22,
@@ -205,3 +270,4 @@ class _ProfileScreenState extends State<ProfileScreen> {
     ));
   }
 }
+
