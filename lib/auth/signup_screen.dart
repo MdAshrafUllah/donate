@@ -4,8 +4,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 
-import 'login_screen.dart';
-
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
   @override
@@ -13,7 +11,6 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupScreenState extends State<SignupScreen> {
-
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -25,16 +22,31 @@ class _SignupScreenState extends State<SignupScreen> {
   FirebaseAuth auth = FirebaseAuth.instance;
   User? user;
 
-  Future userData(String name, String email) async {
-    await FirebaseFirestore.instance.collection("users").add({
-      'name': name,
-      'email': email,
-      'status': 'Unavailable',
-      'uid': auth.currentUser?.uid,
-      'profileImage': 'https://i.stack.imgur.com/YaL3s.jpg',
-      'bio': '',
-      'city': ''
-    });
+  final String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
+
+  Future<void> userData(String name, String email) async {
+    try {
+      User? user = auth.currentUser;
+      if (user != null) {
+        String userId = user.uid;
+        await FirebaseFirestore.instance.collection("users").doc(userId).set({
+          'name': name,
+          'email': email,
+          'status': 'Unavailable',
+          'uid': userId,
+          'profileImage': 'https://i.stack.imgur.com/YaL3s.jpg',
+          'bio': '',
+          'city': '',
+          'mobile': '',
+          'address': ''
+        });
+        print('User data added successfully');
+      } else {
+        print('User is not authenticated');
+      }
+    } catch (e) {
+      print('Error adding user data: $e');
+    }
   }
 
   @override
@@ -309,8 +321,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                   onTap: () async {
                     if (isChecked == false) {
-                      ScaffoldMessenger.of(context)
-                          .showSnackBar(const SnackBar(
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                           behavior: SnackBarBehavior.floating,
                           backgroundColor: Colors.redAccent,
                           content: Text(
@@ -341,15 +352,11 @@ class _SignupScreenState extends State<SignupScreen> {
                         await user!.updateDisplayName(_nameController.text);
                         await user!.reload();
                         user = auth.currentUser;
-          
+
                         if (user != null) {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (Context) =>
-                                  const LoginScreen()));
-                          ScaffoldMessenger.of(context)
-                              .showSnackBar(SnackBar(
+                          Navigator.pushReplacementNamed(
+                              context, "/loginScreen");
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                               behavior: SnackBarBehavior.floating,
                               backgroundColor: Colors.green,
                               content: Text(
@@ -370,38 +377,37 @@ class _SignupScreenState extends State<SignupScreen> {
                           });
                           ScaffoldMessenger.of(context)
                               .showSnackBar(const SnackBar(
-                              behavior: SnackBarBehavior.floating,
-                              backgroundColor: Colors.redAccent,
-                              content: Text(
-                                'The password provided is too weak.',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontFamily: 'Roboto',
-                                ),
-                              )));
+                                  behavior: SnackBarBehavior.floating,
+                                  backgroundColor: Colors.redAccent,
+                                  content: Text(
+                                    'The password provided is too weak.',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontFamily: 'Roboto',
+                                    ),
+                                  )));
                         } else if (e.code == 'email-already-in-use') {
                           setState(() {
                             showSpinner = false;
                           });
                           ScaffoldMessenger.of(context)
                               .showSnackBar(const SnackBar(
-                              behavior: SnackBarBehavior.floating,
-                              backgroundColor: Colors.redAccent,
-                              content: Text(
-                                'The email already used by another user.',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontFamily: 'Roboto',
-                                ),
-                              )));
+                                  behavior: SnackBarBehavior.floating,
+                                  backgroundColor: Colors.redAccent,
+                                  content: Text(
+                                    'The email already used by another user.',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontFamily: 'Roboto',
+                                    ),
+                                  )));
                         }
                       }
                     } else {
                       setState(() {
                         showSpinner = false;
                       });
-                      ScaffoldMessenger.of(context)
-                          .showSnackBar(const SnackBar(
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                           behavior: SnackBarBehavior.floating,
                           backgroundColor: Colors.redAccent,
                           content: Text(
@@ -435,10 +441,8 @@ class _SignupScreenState extends State<SignupScreen> {
                           ),
                           recognizer: TapGestureRecognizer()
                             ..onTap = () {
-                              Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (Context) => const LoginScreen()));
+                              Navigator.pushReplacementNamed(
+                                  context, "/loginScreen");
                             }),
                     ]),
                   ),

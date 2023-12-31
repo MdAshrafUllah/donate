@@ -6,6 +6,8 @@ import 'auth/login_screen.dart';
 import 'onboarding/onboarding_screen.dart';
 
 class SplashScreen extends StatelessWidget {
+  const SplashScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -18,16 +20,9 @@ class SplashScreen extends StatelessWidget {
 
         if (isFirstTime) {
           prefs.setBool('isFirstTime', false);
-
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => OnboardingScreen()),
-          );
+          Navigator.pushReplacementNamed(context, "/onBoardingScreen");
         } else {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => LoginScreen()),
-          );
+          Navigator.pushReplacementNamed(context, "/loginScreen");
         }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(

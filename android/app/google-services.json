@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "822368138519",
-    "project_id": "utsargo-753e2",
-    "storage_bucket": "utsargo-753e2.appspot.com"
+    "project_number": "113399147735",
+    "project_id": "utsargo-official",
+    "storage_bucket": "utsargo-official.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:822368138519:android:778b3b31741ddc463a3352",
+        "mobilesdk_app_id": "1:113399147735:android:eedc5e5a02b43813c8d492",
         "android_client_info": {
           "package_name": "com.userapp.utsargo"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAtJGQG-qe4v8Bht4LGsUe04ZQAiLI55A0"
+          "current_key": "AIzaSyA8n1FMUIx_fb4a0lR7TM42E1ISH1SykAM"
         }
       ],
       "services": {
