@@ -2,13 +2,13 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 
 import '../data/bd_districts.dart';
+import '../widget/initialize_current_user.dart';
 
 class AddPostScreen extends StatefulWidget {
   const AddPostScreen({Key? key}) : super(key: key);
@@ -18,8 +18,6 @@ class AddPostScreen extends StatefulWidget {
 }
 
 class _AddPostScreenState extends State<AddPostScreen> {
-  FirebaseAuth auth = FirebaseAuth.instance;
-  late User? user;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   String selectedDistricts = 'Chattogram';
   bool isLoading = false;
@@ -38,20 +36,6 @@ class _AddPostScreenState extends State<AddPostScreen> {
   @override
   void initState() {
     super.initState();
-    checkUserAuthentication();
-  }
-
-  Future<void> checkUserAuthentication() async {
-    FirebaseAuth auth = FirebaseAuth.instance;
-    User? currentUser = auth.currentUser;
-
-    if (currentUser == null) {
-      print(" দুর শালা");
-    } else {
-      setState(() {
-        user = currentUser;
-      });
-    }
   }
 
   Future<void> _captureImage(ImageSource source) async {
@@ -65,7 +49,8 @@ class _AddPostScreenState extends State<AddPostScreen> {
 
   void uploadToFirebase() async {
     try {
-      if (user == null || user!.email == null) {
+      if (AuthService.currentUser == null ||
+          AuthService.currentUser!.email == null) {
         print('User or email is null');
         return;
       }
@@ -86,7 +71,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
 
       await FirebaseFirestore.instance.collection('posts').doc(productId).set({
         'productId': productId,
-        'email': user!.email!,
+        'email': AuthService.currentUser!.email!,
         'foodImages': downloadUrls,
         'title': titleController.text,
         'description': descriptionController.text,
@@ -112,6 +97,8 @@ class _AddPostScreenState extends State<AddPostScreen> {
         postOfficeController.text = '';
         selectedDistricts = 'Chattogram';
       });
+
+      Navigator.pushReplacementNamed(context, "/navigationScreen");
 
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         behavior: SnackBarBehavior.floating,
@@ -472,13 +459,12 @@ class _AddPostScreenState extends State<AddPostScreen> {
                     ),
                     Center(
                       child: ElevatedButton(
-                        onPressed: () {
+                        onPressed: () async {
                           if (_formKey.currentState!.validate() &&
                               _selectedImages.isNotEmpty) {
                             setState(() {
                               isLoading = true;
                             });
-
                             uploadToFirebase();
                           } else {
                             ScaffoldMessenger.of(context)

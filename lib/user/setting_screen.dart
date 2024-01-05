@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+
+import '../widget/initialize_current_user.dart';
 
 class SettingScreen extends StatefulWidget {
   const SettingScreen({super.key});
@@ -10,8 +11,6 @@ class SettingScreen extends StatefulWidget {
 }
 
 class _SettingScreenState extends State<SettingScreen> {
-  FirebaseAuth auth = FirebaseAuth.instance;
-  User? user;
   String userID = '';
   TextEditingController nameCngController = TextEditingController();
   TextEditingController bioCngController = TextEditingController();
@@ -26,11 +25,10 @@ class _SettingScreenState extends State<SettingScreen> {
   }
 
   Future<void> fetchData() async {
-    if (auth.currentUser != null) {
-      user = auth.currentUser;
+    if (AuthService.currentUser != null) {
       FirebaseFirestore.instance
           .collection('users')
-          .where('email', isEqualTo: user?.email)
+          .where('email', isEqualTo: AuthService.currentUser!.email)
           .get()
           .then((QuerySnapshot querySnapshot) {
         for (var doc in querySnapshot.docs) {
@@ -48,8 +46,7 @@ class _SettingScreenState extends State<SettingScreen> {
 
   Future<void> updateProfile() async {
     try {
-      if (auth.currentUser != null) {
-        user = auth.currentUser;
+      if (AuthService.currentUser != null) {
         final userRef =
             FirebaseFirestore.instance.collection('users').doc(userID);
 
@@ -63,7 +60,7 @@ class _SettingScreenState extends State<SettingScreen> {
 
         FirebaseFirestore.instance
             .collection('posts')
-            .where('userId', isEqualTo: user?.uid)
+            .where('userId', isEqualTo: AuthService.currentUser!.uid)
             .get()
             .then((QuerySnapshot postQuerySnapshot) {
           for (var postDoc in postQuerySnapshot.docs) {
@@ -71,64 +68,6 @@ class _SettingScreenState extends State<SettingScreen> {
                 .collection('posts')
                 .doc(postDoc.id)
                 .update({'name': nameCngController.text});
-          }
-        });
-
-        // Update user's name in the 'posts' collection
-        FirebaseFirestore.instance
-            .collection('posts')
-            .where('userId', isEqualTo: user?.uid)
-            .get()
-            .then((QuerySnapshot postQuerySnapshot) {
-          for (var postDoc in postQuerySnapshot.docs) {
-            FirebaseFirestore.instance
-                .collection('posts')
-                .doc(postDoc.id)
-                .update({'name': nameCngController.text});
-
-            // Update commenter's name in the 'comments' subcollection
-            FirebaseFirestore.instance
-                .collection('posts')
-                .doc(postDoc.id)
-                .collection('comments')
-                .get()
-                .then((QuerySnapshot commentQuerySnapshot) {
-              for (var commentDoc in commentQuerySnapshot.docs) {
-                if (commentDoc["commenterEmail"] == user?.email) {
-                  FirebaseFirestore.instance
-                      .collection('posts')
-                      .doc(postDoc.id)
-                      .collection('comments')
-                      .doc(commentDoc.id)
-                      .update({'commenterName': nameCngController.text});
-                }
-              }
-            });
-          }
-        });
-
-        // Update commenter's name in the 'comments' subcollection
-        FirebaseFirestore.instance
-            .collection('posts')
-            .get()
-            .then((QuerySnapshot postQuerySnapshot) {
-          for (var postDoc in postQuerySnapshot.docs) {
-            FirebaseFirestore.instance
-                .collection('posts')
-                .doc(postDoc.id)
-                .collection('comments')
-                .where('commenterEmail', isEqualTo: user?.email)
-                .get()
-                .then((QuerySnapshot commentQuerySnapshot) {
-              for (var commentDoc in commentQuerySnapshot.docs) {
-                FirebaseFirestore.instance
-                    .collection('posts')
-                    .doc(postDoc.id)
-                    .collection('comments')
-                    .doc(commentDoc.id)
-                    .update({'commenterName': nameCngController.text});
-              }
-            });
           }
         });
 
@@ -259,7 +198,7 @@ class _SettingScreenState extends State<SettingScreen> {
             TextField(
                 enabled: false,
                 decoration: InputDecoration(
-                  hintText: user?.email,
+                  hintText: AuthService.currentUser!.email,
                   border: const OutlineInputBorder(),
                   focusedBorder: OutlineInputBorder(
                     borderSide:

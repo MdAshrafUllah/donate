@@ -1,9 +1,8 @@
-import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+// ignore_for_file: use_build_context_synchronously
 
-import 'auth/login_screen.dart';
-import 'onboarding/onboarding_screen.dart';
+import 'package:flutter/material.dart';
+
+import 'widget/connection_checker.dart';
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
@@ -12,30 +11,12 @@ class SplashScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
-    Future checkInternetConnection() async {
-      var connectivityResult = await Connectivity().checkConnectivity();
-      if (connectivityResult != ConnectivityResult.none) {
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        bool isFirstTime = prefs.getBool('isFirstTime') ?? true;
-
-        if (isFirstTime) {
-          prefs.setBool('isFirstTime', false);
-          Navigator.pushReplacementNamed(context, "/onBoardingScreen");
-        } else {
-          Navigator.pushReplacementNamed(context, "/loginScreen");
-        }
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('No Internet Connection'),
-          ),
-        );
-      }
-    }
-
-    // Check internet connection after delay
     Future.delayed(const Duration(seconds: 5), () {
-      checkInternetConnection();
+      ConnectionChecker.checkAndNavigate(
+        context: context,
+        onBoardingRoute: "/onBoardingScreen",
+        loginRoute: "/loginScreen",
+      );
     });
 
     return Scaffold(

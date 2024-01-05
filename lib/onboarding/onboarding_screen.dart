@@ -35,24 +35,25 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             },
             children: [
               buildPage(
-                color: Colors.white,
-                urlImage: 'assets/onboard1.png',
-                title: 'Collect Food',
-                subtitle:
-                    'If you need food then you can find food for you or your family form here.',
-              ),
+                  color: Colors.white,
+                  urlImage: 'assets/onboard1.png',
+                  title: 'Collect Food',
+                  subtitle:
+                      'If you need food then you can find food for you or your family form here.',
+                  context: context),
               buildPage(
-                color: Colors.white,
-                urlImage: 'assets/onboard2.png',
-                title: 'Save Food',
-                subtitle:
-                    'You can save the Food by using our application. By doing that, you help the world in reduce food waste',
-              ),
+                  color: Colors.white,
+                  urlImage: 'assets/onboard2.png',
+                  title: 'Save Food',
+                  subtitle:
+                      'You can save the Food by using our application. By doing that, you help the world in reduce food waste',
+                  context: context),
               buildPage(
                 color: Colors.white,
                 urlImage: 'assets/onboard3.png',
                 title: 'Donate Food',
                 subtitle: 'You can halp other people by donating the food',
+                context: context,
               ),
             ],
           ),

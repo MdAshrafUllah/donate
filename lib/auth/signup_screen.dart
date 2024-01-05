@@ -1,3 +1,5 @@
+// ignore_for_file: library_private_types_in_public_api
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
@@ -40,6 +42,12 @@ class _SignupScreenState extends State<SignupScreen> {
           'mobile': '',
           'address': ''
         });
+
+        // await FirebaseFirestore.instance
+        //     .collection("users")
+        //     .doc(userId)
+        //     .collection("deliver")
+        //     .add({});
         print('User data added successfully');
       } else {
         print('User is not authenticated');
@@ -57,6 +65,8 @@ class _SignupScreenState extends State<SignupScreen> {
         backgroundColor: Colors.white,
         body: ModalProgressHUD(
           inAsyncCall: showSpinner,
+          opacity: 0.5,
+          blur: 0,
           child: SingleChildScrollView(
             child: Column(
               children: [
@@ -277,7 +287,15 @@ class _SignupScreenState extends State<SignupScreen> {
                     height: size.height / 8.5,
                     width: double.infinity,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF39b54a),
+                      gradient: const LinearGradient(
+                        begin: Alignment(0, -1),
+                        end: Alignment(0, 0),
+                        colors: [
+                          Colors.white,
+                          Color(0xFF39b54a),
+                          Color(0xFF39b54a)
+                        ],
+                      ),
                       borderRadius: const BorderRadius.only(
                         bottomLeft: Radius.circular(20),
                         bottomRight: Radius.circular(20),
@@ -447,6 +465,9 @@ class _SignupScreenState extends State<SignupScreen> {
                     ]),
                   ),
                 ),
+                const SizedBox(
+                  height: 10,
+                )
               ],
             ),
           ),

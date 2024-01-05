@@ -1,10 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:utsargo/Navigation/item_details_page.dart';
+
+import '../posts/item_details_page.dart';
+import '../widget/connection_checker.dart';
+import '../widget/initialize_current_user.dart';
+import '../widget/post_delete_services.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -14,16 +18,31 @@ class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _locationController = TextEditingController();
   List<Map<String, dynamic>> listItem = [];
 
+  String? currentLocation;
+  bool showSpinner = false;
+
   @override
   void initState() {
     super.initState();
     fetchPosts();
   }
 
-  Future<void> fetchPosts() async {
+  String capitalize(String s) {
+    if (s.isEmpty) return s;
+    return s[0].toUpperCase() + s.substring(1);
+  }
+
+  Future<void> fetchPosts({String? location}) async {
     try {
-      QuerySnapshot posts =
-          await FirebaseFirestore.instance.collection('posts').get();
+      Query postsQuery = FirebaseFirestore.instance.collection('posts');
+
+      if (location != null && location.isNotEmpty) {
+        String capitalizedLocation = capitalize(location);
+        postsQuery =
+            postsQuery.where('district', isEqualTo: capitalizedLocation);
+      }
+
+      QuerySnapshot posts = await postsQuery.get();
 
       List<Map<String, dynamic>> postList = posts.docs.map((doc) {
         String firstImageUrl = doc['foodImages'][0];
@@ -34,8 +53,10 @@ class _HomeScreenState extends State<HomeScreen> {
           'title': doc['title'],
           'productId': doc['productId'],
           'isSaved': false,
+          'email': doc['email']
         };
       }).toList();
+
       setState(() {
         listItem = postList;
       });
@@ -75,11 +96,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
           // Update local list to reflect the change
           setState(() {
-            listItem.forEach((item) {
+            for (var item in listItem) {
               if (item['productId'] == post['productId']) {
                 item['isSaved'] = false;
               }
-            });
+            }
           });
 
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -140,13 +161,13 @@ class _HomeScreenState extends State<HomeScreen> {
             savedPostsSnapshot.docs.map((doc) => doc['productId']));
 
         setState(() {
-          listItem.forEach((post) {
+          for (var post in listItem) {
             if (savedProductIds.contains(post['productId'])) {
               post['isSaved'] = true;
             } else {
               post['isSaved'] = false;
             }
-          });
+          }
         });
       }
     } catch (e) {
@@ -167,6 +188,9 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    ConnectionChecker.checkAndNavigate(
+      context: context,
+    );
     fetchSavedPosts();
     return Scaffold(
       body: Padding(
@@ -202,7 +226,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         fontSize: size.width / 30,
                         fontWeight: FontWeight.bold,
                       ),
-                      keyboardType: TextInputType.emailAddress,
+                      textInputAction: TextInputAction.search,
+                      keyboardType: TextInputType.text,
                       cursorColor: const Color(0xFF39b54a),
                       decoration: InputDecoration(
                         hintText: 'Location',
@@ -214,46 +239,13 @@ class _HomeScreenState extends State<HomeScreen> {
                         enabledBorder: InputBorder.none,
                         focusedBorder: InputBorder.none,
                       ),
+                      onChanged: (value) {
+                        setState(() {
+                          currentLocation = value;
+                        });
+                        fetchPosts(location: value);
+                      },
                     ),
-                  ),
-                ),
-                const SizedBox(
-                  width: 10,
-                ),
-                MaterialButton(
-                  minWidth: size.width / 20,
-                  height: size.height / 20,
-                  onPressed: () {},
-                  color: const Color(0xFF39b54a),
-                  child: Text(
-                    'Go',
-                    style: TextStyle(
-                        fontSize: size.width / 22, color: Colors.white),
-                  ),
-                )
-              ],
-            ),
-            const SizedBox(
-              height: 15,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    Scaffold.of(context).openDrawer();
-                  },
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.filter_alt,
-                        color: Color(0xFF39b54a),
-                      ),
-                      Text(
-                        'Filter',
-                        style: TextStyle(fontSize: size.width / 24),
-                      )
-                    ],
                   ),
                 ),
               ],
@@ -300,7 +292,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               ),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
                                   Padding(
@@ -331,6 +324,36 @@ class _HomeScreenState extends State<HomeScreen> {
                                       ),
                                     ),
                                   ),
+                                  if (AuthService.currentUser != null &&
+                                      AuthService.currentUser!.email ==
+                                          currentItem['email'])
+                                    Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: MaterialButton(
+                                        onPressed: () async {
+                                          await PostService
+                                              .showConfirmationDialog(
+                                            context: context,
+                                            title: currentItem['title'],
+                                            content: currentItem['productId'],
+                                            deletePostList: _handleRefresh,
+                                          );
+                                        },
+                                        color: Colors.white,
+                                        height: size.height * 0.04,
+                                        minWidth: size.width * 0.085,
+                                        padding: const EdgeInsets.all(0),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        child: Icon(
+                                          Icons.more_vert,
+                                          size: size.height * 0.03,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                    ),
                                 ],
                               ),
                             ),
@@ -356,10 +379,13 @@ class _HomeScreenState extends State<HomeScreen> {
                               child: Text(
                                 currentItem["title"],
                                 style: TextStyle(
-                                    fontSize: size.width * 0.045,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black,
-                                    height: 1),
+                                  fontSize: size.width * 0.045,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                  height: 1,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           ],

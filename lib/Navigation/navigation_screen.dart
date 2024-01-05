@@ -1,10 +1,10 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import '../widget/initialize_current_user.dart';
 import 'home_screen.dart';
 import 'message_screen.dart';
 import 'notification_screen.dart';
@@ -18,18 +18,15 @@ class NavigationScreen extends StatefulWidget {
 }
 
 class _NavigationScreenState extends State<NavigationScreen> {
-  FirebaseAuth auth = FirebaseAuth.instance;
-  User? user;
   String userID = '';
 
   @override
   void initState() {
     super.initState();
-    if (auth.currentUser != null) {
-      user = auth.currentUser;
+    if (AuthService.currentUser != null) {
       FirebaseFirestore.instance
           .collection('users')
-          .where('email', isEqualTo: user?.email)
+          .where('email', isEqualTo: AuthService.currentUser!.email)
           .get()
           .then((QuerySnapshot querySnapshot) {
         for (var doc in querySnapshot.docs) {

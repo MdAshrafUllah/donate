@@ -1,16 +1,21 @@
+import 'package:device_preview/device_preview.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'Navigation/add_post_screen.dart';
+import 'posts/add_post_screen.dart';
 import 'Navigation/navigation_screen.dart';
 import 'auth/forget_password_screen.dart';
 import 'auth/login_screen.dart';
 import 'auth/signup_screen.dart';
 import 'onboarding/onboarding_screen.dart';
 import 'splash_screen.dart';
+import 'user/food_deliver.dart';
+import 'user/food_receiver.dart';
+import 'user/posts_manager.dart';
 import 'user/save.dart';
 import 'user/setting_screen.dart';
+import 'widget/initialize_current_user.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,9 +28,12 @@ void main() async {
       storageBucket: "utsargo-official.appspot.com",
     ),
   );
+  await AuthService.initializeCurrentUser();
   SharedPreferences prefs = await SharedPreferences.getInstance();
   bool isFirstTime = prefs.getBool('isFirstTime') ?? true;
-  runApp(MyApp(isFirstTime: isFirstTime));
+  runApp(DevicePreview(
+      enabled: true,
+      builder: (BuildContext context) => MyApp(isFirstTime: isFirstTime)));
 }
 
 class MyApp extends StatelessWidget {
@@ -36,6 +44,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+        useInheritedMediaQuery: true,
+        locale: DevicePreview.locale(context),
+        builder: DevicePreview.appBuilder,
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
             useMaterial3: true,
@@ -55,9 +66,9 @@ class MyApp extends StatelessWidget {
               foregroundColor: Colors.white,
             ))),
         title: 'Utsargo',
-        initialRoute: '/splashScreen',
+        initialRoute: '/',
         routes: {
-          '/splashScreen': (context) => const SplashScreen(),
+          '/': (context) => const SplashScreen(),
           '/onBoardingScreen': (context) => OnboardingScreen(),
           '/loginScreen': (context) => const LoginScreen(),
           '/signupScreen': (context) => const SignupScreen(),
@@ -67,6 +78,9 @@ class MyApp extends StatelessWidget {
           '/settingScreen': (context) => const SettingScreen(),
           '/saveItemsScreen': (context) => const SaveItemsScreen(),
           '/addPostScreen': (context) => const AddPostScreen(),
+          '/foodReceiver': (context) => const FoodReceiver(),
+          '/foodDeliver': (context) => const FoodDeliver(),
+          '/postsManager': (context) => const PostsMabagerScreen(),
         });
   }
 }

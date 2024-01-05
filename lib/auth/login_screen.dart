@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -61,6 +63,8 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Scaffold(
           backgroundColor: Colors.white,
           body: ModalProgressHUD(
+            opacity: 0.5,
+            blur: 0,
             inAsyncCall: showSpinner,
             child: SingleChildScrollView(
               child: Column(
@@ -148,6 +152,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       keyboardType: TextInputType.text,
                       cursorColor: const Color(0xFF39b54a),
                       obscureText: _passwordVisible,
+                      textInputAction: TextInputAction.search,
                       decoration: InputDecoration(
                         hintText: 'Password',
                         hintStyle: TextStyle(
@@ -199,7 +204,15 @@ class _LoginScreenState extends State<LoginScreen> {
                       height: size.height / 8.5,
                       width: double.infinity,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF39b54a),
+                        gradient: const LinearGradient(
+                          begin: Alignment(0, -1),
+                          end: Alignment(0, 0),
+                          colors: [
+                            Colors.white,
+                            Color(0xFF39b54a),
+                            Color(0xFF39b54a)
+                          ],
+                        ),
                         borderRadius: const BorderRadius.only(
                           bottomLeft: Radius.circular(20),
                           bottomRight: Radius.circular(20),
@@ -215,7 +228,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: Column(
                         children: [
                           Container(
-                            height: size.height / 50,
+                            height: size.height * 0.02,
                             width: double.infinity,
                             decoration: const BoxDecoration(
                               color: Colors.white,
