@@ -2,10 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-import '../posts/item_details_page.dart';
-import '../widget/connection_checker.dart';
-import '../widget/initialize_current_user.dart';
-import '../widget/post_delete_services.dart';
+import '../../posts/item_details_page.dart';
+import '../../widget/connection_checker.dart';
+import '../../widget/initialize_current_user.dart';
+import '../../widget/post_delete_services.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});

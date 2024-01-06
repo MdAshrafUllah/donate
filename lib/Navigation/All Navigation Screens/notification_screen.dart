@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-import '../widget/initialize_current_user.dart';
+import '../../widget/initialize_current_user.dart';
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({Key? key});
@@ -139,12 +139,13 @@ class _NotificationScreenState extends State<NotificationScreen> {
                               },
                             ),
                           ),
+                          const Divider()
                         ],
                       ),
                     ),
                   if (receiverList.isNotEmpty)
                     Padding(
-                      padding: const EdgeInsets.all(8.0),
+                      padding: const EdgeInsets.only(left: 8, right: 8),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -179,6 +180,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                               },
                             ),
                           ),
+                          const Divider()
                         ],
                       ),
                     ),

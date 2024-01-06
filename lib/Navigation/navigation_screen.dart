@@ -5,16 +5,18 @@ import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../widget/initialize_current_user.dart';
-import 'home_screen.dart';
-import 'message_screen.dart';
-import 'notification_screen.dart';
-import 'profile_screen.dart';
+import 'All Navigation Screens/home_screen.dart';
+import 'All Navigation Screens/message_screen.dart';
+import 'All Navigation Screens/notification_screen.dart';
+import 'All Navigation Screens/profile_screen.dart';
 
 class NavigationScreen extends StatefulWidget {
   const NavigationScreen({super.key});
 
   @override
   State<NavigationScreen> createState() => _NavigationScreenState();
+
+  static void setStatus(String s) {}
 }
 
 class _NavigationScreenState extends State<NavigationScreen> {
@@ -32,7 +34,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
         for (var doc in querySnapshot.docs) {
           String documentId = doc.id;
           userID = documentId;
-          // setStatus("Online");
+          setStatus("Online");
         }
       });
     }
@@ -76,6 +78,35 @@ class _NavigationScreenState extends State<NavigationScreen> {
     const NotificationScreen(),
     const ProfileScreen(),
   ];
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final int? argument = ModalRoute.of(context)?.settings.arguments as int?;
+    if (argument != null) {
+      setState(() {
+        index = argument;
+      });
+    }
+  }
+
+  void setStatus(String status) async {
+    if (AuthService.currentUser != null) {
+      await FirebaseFirestore.instance.collection('users').doc(userID).update({
+        "status": status,
+      });
+    }
+  }
+
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // online
+      setStatus("Online");
+    } else {
+      setStatus("Offline");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;

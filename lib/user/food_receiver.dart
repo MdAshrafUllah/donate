@@ -77,7 +77,6 @@ class _FoodReceiverState extends State<FoodReceiver> {
 
   Future<void> cancelRequest(String requestId) async {
     try {
-      // Remove the document from the collection 'receiver'
       await FirebaseFirestore.instance
           .collection('users')
           .doc(AuthService.currentUser!.uid)
@@ -85,10 +84,39 @@ class _FoodReceiverState extends State<FoodReceiver> {
           .doc(requestId)
           .delete();
 
-      // Update the UI by refetching the receiverList after deletion
       await fetchReceiverList();
     } catch (e) {
       print('Error canceling request: $e');
+    }
+  }
+
+  Future<void> createContact(
+      String senderId, String senderName, String senderUid) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(AuthService.currentUser!.uid)
+          .collection('contacts')
+          .doc(senderId)
+          .set({
+        'name': senderName,
+        'uid': senderUid,
+      });
+
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(senderId)
+          .collection('contacts')
+          .doc(AuthService.currentUser!.uid)
+          .set({
+        'name': AuthService.currentUser!.displayName,
+        'uid': AuthService.currentUser!.uid,
+      });
+
+      Navigator.pushReplacementNamed(context, "/navigationScreen",
+          arguments: 1);
+    } catch (e) {
+      print("Error creating contact: $e");
     }
   }
 
@@ -127,7 +155,13 @@ class _FoodReceiverState extends State<FoodReceiver> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               ElevatedButton(
-                                onPressed: () {},
+                                onPressed: () async {
+                                  createContact(
+                                      senderId,
+                                      senderNames[senderId].toString(),
+                                      senderId);
+                                  await cancelRequest(receiverList[index].id);
+                                },
                                 style: ElevatedButton.styleFrom(
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(5),
