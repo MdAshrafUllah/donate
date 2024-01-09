@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -5,7 +7,7 @@ import '../posts/item_details_page.dart';
 import '../widget/initialize_current_user.dart';
 
 class SaveItemsScreen extends StatefulWidget {
-  const SaveItemsScreen({Key? key});
+  const SaveItemsScreen({super.key});
 
   @override
   State<SaveItemsScreen> createState() => _SaveItemsScreenState();

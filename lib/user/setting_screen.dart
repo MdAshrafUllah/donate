@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -106,7 +108,7 @@ class _SettingScreenState extends State<SettingScreen> {
             onPressed: () {
               Navigator.pop(context);
             },
-            icon: Icon(Icons.arrow_back)),
+            icon: const Icon(Icons.arrow_back)),
         title: const Text(
           'Settings',
           style: TextStyle(
@@ -122,7 +124,7 @@ class _SettingScreenState extends State<SettingScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              "Proifle Information",
+              "Profile Information",
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -143,7 +145,7 @@ class _SettingScreenState extends State<SettingScreen> {
               height: 5,
             ),
             TextField(
-              cursorColor: Color(0xFF39b54a),
+              cursorColor: const Color(0xFF39b54a),
               style: const TextStyle(color: Colors.black),
               controller: nameCngController,
               decoration: const InputDecoration(
@@ -169,7 +171,7 @@ class _SettingScreenState extends State<SettingScreen> {
               height: 5,
             ),
             TextField(
-              cursorColor: Color(0xFF39b54a),
+              cursorColor: const Color(0xFF39b54a),
               style: const TextStyle(color: Colors.black),
               maxLength: 50,
               controller: bioCngController,
@@ -200,7 +202,7 @@ class _SettingScreenState extends State<SettingScreen> {
                 decoration: InputDecoration(
                   hintText: AuthService.currentUser!.email,
                   border: const OutlineInputBorder(),
-                  focusedBorder: OutlineInputBorder(
+                  focusedBorder: const OutlineInputBorder(
                     borderSide:
                         BorderSide(color: Color(0xFF39b54a), width: 2.0),
                   ),
@@ -219,7 +221,7 @@ class _SettingScreenState extends State<SettingScreen> {
               height: 5,
             ),
             TextField(
-              cursorColor: Color(0xFF39b54a),
+              cursorColor: const Color(0xFF39b54a),
               keyboardType: TextInputType.phone,
               style: const TextStyle(color: Colors.black),
               maxLength: 12,
@@ -247,7 +249,7 @@ class _SettingScreenState extends State<SettingScreen> {
               height: 5,
             ),
             TextField(
-              cursorColor: Color(0xFF39b54a),
+              cursorColor: const Color(0xFF39b54a),
               style: const TextStyle(color: Colors.black),
               maxLength: 50,
               controller: cityController,
@@ -277,7 +279,7 @@ class _SettingScreenState extends State<SettingScreen> {
               height: 5,
             ),
             TextField(
-              cursorColor: Color(0xFF39b54a),
+              cursorColor: const Color(0xFF39b54a),
               style: const TextStyle(color: Colors.black),
               maxLength: 200,
               controller: addressController,

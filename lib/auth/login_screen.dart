@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../widget/connection_checker.dart';
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -57,8 +59,9 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
-    return WillPopScope(
-      onWillPop: () async => _onBackbuttonpressed(context),
+    return PopScope(
+      canPop: true,
+      onPopInvoked: (didPop) async => _onBackbuttonpressed(context),
       child: SafeArea(
         child: Scaffold(
           backgroundColor: Colors.white,
@@ -253,6 +256,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     onTap: () async {
+                      ConnectionChecker.checkAndNavigate(
+                        context: context,
+                      );
                       if (_emailController.text.length > 5 &&
                           _emailController.text.contains('@') &&
                           _emailController.text.endsWith('.com')) {
@@ -391,7 +397,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           recognizer: TapGestureRecognizer()
                             ..onTap = () {
-                              Navigator.pushNamed(context, "/signupScreen");
+                              Navigator.pushNamed(context, "/signUpScreen");
                             },
                         ),
                       ]),

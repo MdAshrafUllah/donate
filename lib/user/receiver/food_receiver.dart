@@ -1,11 +1,11 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-
-import '../widget/initialize_current_user.dart';
+import '../../widget/initialize_current_user.dart';
 
 class FoodReceiver extends StatefulWidget {
   const FoodReceiver({super.key});
-
   @override
   State<FoodReceiver> createState() => _FoodReceiverState();
 }
@@ -15,7 +15,6 @@ class _FoodReceiverState extends State<FoodReceiver> {
   late Map<String, String> senderNames = {};
   late Map<String, String> postTitles = {};
   late Map<String, String> postsImages = {};
-
   @override
   void initState() {
     super.initState();
@@ -26,22 +25,19 @@ class _FoodReceiverState extends State<FoodReceiver> {
     try {
       if (AuthService.currentUser != null) {
         final currentUserId = AuthService.currentUser!.uid;
-
         QuerySnapshot userSnapshot = await FirebaseFirestore.instance
             .collection('users')
             .doc(currentUserId)
             .collection('receiver')
             .get();
-
         setState(() {
           receiverList = userSnapshot.docs;
         });
-
         await fetchSenderNames();
         await fetchPostTitlesAndImages();
       }
     } catch (e) {
-      print('Error fetching post owner\'s receiver list: $e');
+      debugPrint('Error fetching post owner\'s receiver list: $e');
     }
   }
 
@@ -52,7 +48,6 @@ class _FoodReceiverState extends State<FoodReceiver> {
           .collection('users')
           .doc(senderId)
           .get();
-
       setState(() {
         senderNames[senderId] = senderSnapshot['name'];
       });
@@ -66,7 +61,6 @@ class _FoodReceiverState extends State<FoodReceiver> {
           .collection('posts')
           .doc(postId)
           .get();
-
       setState(() {
         postTitles[postId] = postSnapshot['title'] ?? '';
         List<dynamic> images = postSnapshot['foodImages'] ?? [];
@@ -83,10 +77,9 @@ class _FoodReceiverState extends State<FoodReceiver> {
           .collection('receiver')
           .doc(requestId)
           .delete();
-
       await fetchReceiverList();
     } catch (e) {
-      print('Error canceling request: $e');
+      debugPrint('Error canceling request: $e');
     }
   }
 
@@ -102,7 +95,6 @@ class _FoodReceiverState extends State<FoodReceiver> {
         'name': senderName,
         'uid': senderUid,
       });
-
       await FirebaseFirestore.instance
           .collection('users')
           .doc(senderId)
@@ -112,16 +104,16 @@ class _FoodReceiverState extends State<FoodReceiver> {
         'name': AuthService.currentUser!.displayName,
         'uid': AuthService.currentUser!.uid,
       });
-
       Navigator.pushReplacementNamed(context, "/navigationScreen",
           arguments: 1);
     } catch (e) {
-      print("Error creating contact: $e");
+      debugPrint("Error creating contact: $e");
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
     return SafeArea(
       child: Scaffold(
           appBar: AppBar(
@@ -138,7 +130,6 @@ class _FoodReceiverState extends State<FoodReceiver> {
                     itemBuilder: (context, index) {
                       String senderId = receiverList[index]['senderId'];
                       String postId = receiverList[index]['postId'];
-
                       return Card(
                         child: ListTile(
                           leading: Image.network(
@@ -156,11 +147,17 @@ class _FoodReceiverState extends State<FoodReceiver> {
                             children: [
                               ElevatedButton(
                                 onPressed: () async {
-                                  createContact(
-                                      senderId,
-                                      senderNames[senderId].toString(),
-                                      senderId);
+                                  String senderId =
+                                      receiverList[index]['senderId'];
+                                  String postId = receiverList[index]['postId'];
+                                  try {
+                                    await saveProductDetails(senderId, postId);
+                                  } catch (e) {
+                                    debugPrint(
+                                        'Error accepting request and saving product details: $e');
+                                  }
                                   await cancelRequest(receiverList[index].id);
+                                  Navigator.pushNamed(context, '/donateList');
                                 },
                                 style: ElevatedButton.styleFrom(
                                   shape: RoundedRectangleBorder(
@@ -181,6 +178,20 @@ class _FoodReceiverState extends State<FoodReceiver> {
                                     backgroundColor: Colors.red),
                                 child: const Text('Cancel'),
                               ),
+                              const Spacer(),
+                              IconButton(
+                                onPressed: () {
+                                  createContact(
+                                      senderId,
+                                      senderNames[senderId].toString(),
+                                      senderId);
+                                },
+                                icon: Icon(
+                                  Icons.chat,
+                                  size: size.width * 0.1,
+                                ),
+                                color: const Color(0xFF39b54a),
+                              )
                             ],
                           ),
                         ),
@@ -189,5 +200,30 @@ class _FoodReceiverState extends State<FoodReceiver> {
                   ),
                 )),
     );
+  }
+
+  Future<void> saveProductDetails(String senderId, String postId) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(AuthService.currentUser!.uid)
+          .collection('forDonate')
+          .add({
+        'senderId': senderId,
+        'postId': postId,
+      });
+
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(senderId)
+          .collection('forReceive')
+          .add({
+        'senderId': AuthService.currentUser!.uid,
+        'postId': postId,
+      });
+    } catch (e) {
+      debugPrint('Error saving product details: $e');
+      rethrow;
+    }
   }
 }

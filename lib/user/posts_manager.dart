@@ -5,14 +5,14 @@ import '../posts/item_details_page.dart';
 import '../widget/initialize_current_user.dart';
 import '../widget/post_delete_services.dart';
 
-class PostsMabagerScreen extends StatefulWidget {
-  const PostsMabagerScreen({super.key});
+class PostsManagerScreen extends StatefulWidget {
+  const PostsManagerScreen({super.key});
 
   @override
-  State<PostsMabagerScreen> createState() => _PostsMabagerScreenState();
+  State<PostsManagerScreen> createState() => _PostsManagerScreenState();
 }
 
-class _PostsMabagerScreenState extends State<PostsMabagerScreen> {
+class _PostsManagerScreenState extends State<PostsManagerScreen> {
   List<Map<String, dynamic>> postsManage = [];
 
   @override
@@ -45,7 +45,7 @@ class _PostsMabagerScreenState extends State<PostsMabagerScreen> {
         postsManage = fetchedPosts;
       });
     }).catchError((error) {
-      print("Error fetching posts: $error");
+      debugPrint("Error fetching posts: $error");
     });
   }
 
@@ -62,84 +62,89 @@ class _PostsMabagerScreenState extends State<PostsMabagerScreen> {
         appBar: AppBar(
           title: const Text("Manage Posts"),
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: ListView.builder(
-            itemCount: postsManage.length,
-            itemBuilder: (context, index) {
-              Map<String, dynamic> currentItem = postsManage[index];
+        body: postsManage.isEmpty
+            ? const Center(
+                child: Text("You don't have any Posts"),
+              )
+            : Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ListView.builder(
+                  itemCount: postsManage.length,
+                  itemBuilder: (context, index) {
+                    Map<String, dynamic> currentItem = postsManage[index];
 
-              return GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ItemDetailsScreen(
-                        listItem: {'productId': currentItem['productId']},
-                      ),
-                    ),
-                  );
-                },
-                child: Card(
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: ListTile(
-                          leading: Image.network(
-                            currentItem['image'] ??
-                                'https://via.placeholder.com/150',
-                            // Replace with your error widget if image fails to load
-                            errorBuilder: (BuildContext context,
-                                Object exception, StackTrace? stackTrace) {
-                              return const Icon(Icons.error);
-                            },
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ItemDetailsScreen(
+                              listItem: {'productId': currentItem['productId']},
+                            ),
                           ),
-                          title: Text(currentItem['title'] ??
-                              ''), // Handling null values
-                          subtitle: Row(
-                            children: [
-                              Icon(
-                                Icons.location_on,
-                                color: const Color(0xFF39b54a),
-                                size: size.width * 0.035,
+                        );
+                      },
+                      child: Card(
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: ListTile(
+                                leading: Image.network(
+                                  currentItem['image'] ??
+                                      'https://via.placeholder.com/150',
+                                  // Replace with your error widget if image fails to load
+                                  errorBuilder: (BuildContext context,
+                                      Object exception,
+                                      StackTrace? stackTrace) {
+                                    return const Icon(Icons.error);
+                                  },
+                                ),
+                                title: Text(currentItem['title'] ??
+                                    ''), // Handling null values
+                                subtitle: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.location_on,
+                                      color: const Color(0xFF39b54a),
+                                      size: size.width * 0.035,
+                                    ),
+                                    Text(currentItem['subtitle'] ?? ''),
+                                  ],
+                                ), // Handling null values
                               ),
-                              Text(currentItem['subtitle'] ?? ''),
-                            ],
-                          ), // Handling null values
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: MaterialButton(
+                                onPressed: () async {
+                                  await PostService.showConfirmationDialog(
+                                    context: context,
+                                    title: currentItem['title'],
+                                    content: currentItem['productId'],
+                                    deletePostList: _handleRefresh,
+                                  );
+                                },
+                                color: Colors.white,
+                                height: size.height * 0.04,
+                                minWidth: size.width * 0.085,
+                                padding: const EdgeInsets.all(0),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Icon(
+                                  Icons.more_vert,
+                                  size: size.height * 0.03,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: MaterialButton(
-                          onPressed: () async {
-                            await PostService.showConfirmationDialog(
-                              context: context,
-                              title: currentItem['title'],
-                              content: currentItem['productId'],
-                              deletePostList: _handleRefresh,
-                            );
-                          },
-                          color: Colors.white,
-                          height: size.height * 0.04,
-                          minWidth: size.width * 0.085,
-                          padding: const EdgeInsets.all(0),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Icon(
-                            Icons.more_vert,
-                            size: size.height * 0.03,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                    );
+                  },
                 ),
-              );
-            },
-          ),
-        ),
+              ),
       ),
     );
   }

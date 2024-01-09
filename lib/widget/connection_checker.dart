@@ -13,7 +13,7 @@ class ConnectionChecker {
   }) async {
     var connectivityResult = await Connectivity().checkConnectivity();
     if (connectivityResult != ConnectivityResult.none) {
-      if (!_isOnlineMessageShown) {
+      if (_isOnlineMessageShown == true) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           behavior: SnackBarBehavior.floating,
           backgroundColor: Colors.green,
@@ -25,8 +25,7 @@ class ConnectionChecker {
             ),
           ),
         ));
-        _isOnlineMessageShown =
-            true; // Update flag to indicate the message was shown
+        _isOnlineMessageShown = false;
       }
 
       SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -54,6 +53,8 @@ class ConnectionChecker {
           ),
         ),
       ));
+
+      _isOnlineMessageShown = true;
     }
   }
 }

@@ -1,4 +1,3 @@
-import 'package:device_preview/device_preview.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -7,12 +6,16 @@ import 'posts/add_post_screen.dart';
 import 'Navigation/navigation_screen.dart';
 import 'auth/forget_password_screen.dart';
 import 'auth/login_screen.dart';
-import 'auth/signup_screen.dart';
+import 'auth/sign_up_screen.dart';
 import 'onboarding/onboarding_screen.dart';
 import 'splash_screen.dart';
-import 'user/food_deliver.dart';
-import 'user/food_receiver.dart';
+import 'user/deliver/delivery_list.dart';
+import 'user/deliver/food_deliver.dart';
+import 'user/donate/donate_list.dart';
 import 'user/posts_manager.dart';
+import 'user/terms_and_conditions.dart';
+import 'user/receiver/food_receiver.dart';
+import 'user/receiver/receiver_list.dart';
 import 'user/save.dart';
 import 'user/setting_screen.dart';
 import 'widget/initialize_current_user.dart';
@@ -31,9 +34,7 @@ void main() async {
   await AuthService.initializeCurrentUser();
   SharedPreferences prefs = await SharedPreferences.getInstance();
   bool isFirstTime = prefs.getBool('isFirstTime') ?? true;
-  runApp(DevicePreview(
-      enabled: true,
-      builder: (BuildContext context) => MyApp(isFirstTime: isFirstTime)));
+  runApp(MyApp(isFirstTime: isFirstTime));
 }
 
 class MyApp extends StatelessWidget {
@@ -44,34 +45,31 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        useInheritedMediaQuery: true,
-        locale: DevicePreview.locale(context),
-        builder: DevicePreview.appBuilder,
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
             useMaterial3: true,
             colorScheme: ColorScheme.fromSeed(
-              seedColor: Color(0xFF39b54a),
+              seedColor: const Color(0xFF39b54a),
               brightness: Brightness.light,
               background: Colors.white,
             ),
-            appBarTheme: AppBarTheme(
+            appBarTheme: const AppBarTheme(
               centerTitle: true,
               foregroundColor: Colors.white,
               backgroundColor: Color(0xFF39b54a),
             ),
             elevatedButtonTheme: ElevatedButtonThemeData(
                 style: ElevatedButton.styleFrom(
-              backgroundColor: Color(0xFF39b54a),
+              backgroundColor: const Color(0xFF39b54a),
               foregroundColor: Colors.white,
             ))),
         title: 'Utsargo',
         initialRoute: '/',
         routes: {
           '/': (context) => const SplashScreen(),
-          '/onBoardingScreen': (context) => OnboardingScreen(),
+          '/onBoardingScreen': (context) => const OnboardingScreen(),
           '/loginScreen': (context) => const LoginScreen(),
-          '/signupScreen': (context) => const SignupScreen(),
+          '/signUpScreen': (context) => const SignUpScreen(),
           '/navigationScreen': (context) => const NavigationScreen(),
           '/manageProfile': (context) => const SettingScreen(),
           '/forgetPasswordScreen': (context) => const ForgetPasswordScreen(),
@@ -80,7 +78,11 @@ class MyApp extends StatelessWidget {
           '/addPostScreen': (context) => const AddPostScreen(),
           '/foodReceiver': (context) => const FoodReceiver(),
           '/foodDeliver': (context) => const FoodDeliver(),
-          '/postsManager': (context) => const PostsMabagerScreen(),
+          '/postsManager': (context) => const PostsManagerScreen(),
+          '/deliveryList': (context) => const DeliveryList(),
+          '/receiverList': (context) => const ReceiverList(),
+          '/donateList': (context) => const DonateList(),
+          '/privacyAndSecurity': (context) => const TermsandConditions(),
         });
   }
 }

@@ -1,10 +1,10 @@
 import 'dart:io';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-import '../widget/initialize_current_user.dart';
+import '../widget/active_status.dart';
+import '../widget/connection_checker.dart';
 import 'All Navigation Screens/home_screen.dart';
 import 'All Navigation Screens/message_screen.dart';
 import 'All Navigation Screens/notification_screen.dart';
@@ -20,24 +20,10 @@ class NavigationScreen extends StatefulWidget {
 }
 
 class _NavigationScreenState extends State<NavigationScreen> {
-  String userID = '';
-
   @override
   void initState() {
     super.initState();
-    if (AuthService.currentUser != null) {
-      FirebaseFirestore.instance
-          .collection('users')
-          .where('email', isEqualTo: AuthService.currentUser!.email)
-          .get()
-          .then((QuerySnapshot querySnapshot) {
-        for (var doc in querySnapshot.docs) {
-          String documentId = doc.id;
-          userID = documentId;
-          setStatus("Online");
-        }
-      });
-    }
+    statusOnline();
     requestAndCheckPermissions();
   }
 
@@ -90,14 +76,6 @@ class _NavigationScreenState extends State<NavigationScreen> {
     }
   }
 
-  void setStatus(String status) async {
-    if (AuthService.currentUser != null) {
-      await FirebaseFirestore.instance.collection('users').doc(userID).update({
-        "status": status,
-      });
-    }
-  }
-
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       // online
@@ -110,6 +88,9 @@ class _NavigationScreenState extends State<NavigationScreen> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    ConnectionChecker.checkAndNavigate(
+      context: context,
+    );
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
@@ -137,8 +118,9 @@ class _NavigationScreenState extends State<NavigationScreen> {
           //   ),
           // ],
         ),
-        body: WillPopScope(
-          onWillPop: () async => _onBackbuttonpressed(context),
+        body: PopScope(
+          canPop: true,
+          onPopInvoked: (didPop) => _onBackbuttonpressed(context),
           child: screens[index],
         ),
         bottomNavigationBar: NavigationBarTheme(

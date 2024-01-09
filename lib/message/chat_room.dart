@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -11,10 +9,10 @@ class ChatRoom extends StatefulWidget {
   final Map<String, dynamic> userMap;
 
   const ChatRoom({
-    Key? key,
+    super.key,
     required this.chatRoomId,
     required this.userMap,
-  }) : super(key: key);
+  });
 
   @override
   ChatRoomState createState() => ChatRoomState();
@@ -23,9 +21,9 @@ class ChatRoom extends StatefulWidget {
 class ChatRoomState extends State<ChatRoom> {
   final TextEditingController _message = TextEditingController();
   final FirebaseAuth auth = FirebaseAuth.instance;
-  File? imageFile;
   final scrollController = ScrollController();
   bool _isUserScrolling = false;
+  String userID = '';
 
   @override
   void initState() {
@@ -47,7 +45,7 @@ class ChatRoomState extends State<ChatRoom> {
   void onSendMessage() async {
     if (_message.text.isNotEmpty) {
       Map<String, dynamic> messages = {
-        "sendby": auth.currentUser!.displayName,
+        "sendBy": auth.currentUser!.displayName,
         "message": _message.text,
         "type": "text",
         "time": FieldValue.serverTimestamp(),
@@ -72,7 +70,7 @@ class ChatRoomState extends State<ChatRoom> {
 
   Color getDotColor(String status) {
     if (status == 'Online') {
-      return Colors.greenAccent;
+      return Colors.greenAccent.shade400;
     } else {
       return Colors.red;
     }
@@ -89,10 +87,33 @@ class ChatRoomState extends State<ChatRoom> {
               CircleAvatar(
                 backgroundImage: NetworkImage(widget.userMap['profilePicture']),
               ),
-              SizedBox(width: 8), // Adjust spacing as needed
-              Text(
-                widget.userMap['name'],
-                style: TextStyle(fontSize: 18),
+              const SizedBox(width: 8),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.userMap['name'],
+                    style: const TextStyle(fontSize: 18),
+                  ),
+                  const SizedBox(height: 2),
+                  Row(
+                    children: [
+                      Text(
+                        widget.userMap['status'],
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                      Container(
+                        width: 10,
+                        height: 10,
+                        margin: const EdgeInsets.symmetric(horizontal: 5),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: getDotColor(widget.userMap['status']),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ],
           ),
@@ -177,13 +198,13 @@ class ChatRoomState extends State<ChatRoom> {
       return Container(
         margin: const EdgeInsets.only(top: 10),
         width: size.width,
-        alignment: map['sendby'] == auth.currentUser!.displayName
+        alignment: map['sendBy'] == auth.currentUser!.displayName
             ? Alignment.centerRight
             : Alignment.centerLeft,
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 14),
           margin: const EdgeInsets.symmetric(vertical: 0, horizontal: 8),
-          decoration: map['sendby'] == auth.currentUser!.displayName
+          decoration: map['sendBy'] == auth.currentUser!.displayName
               ? const BoxDecoration(
                   borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(15),
@@ -212,7 +233,7 @@ class ChatRoomState extends State<ChatRoom> {
       return Container(
         width: size.width,
         padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
-        alignment: map['sendby'] == auth.currentUser!.displayName
+        alignment: map['sendBy'] == auth.currentUser!.displayName
             ? Alignment.centerRight
             : Alignment.centerLeft,
         child: InkWell(
@@ -220,7 +241,7 @@ class ChatRoomState extends State<ChatRoom> {
           child: Container(
             height: size.height / 22,
             width: size.width / 2,
-            decoration: map['sendby'] == auth.currentUser!.displayName
+            decoration: map['sendBy'] == auth.currentUser!.displayName
                 ? const BoxDecoration(
                     borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(15),
@@ -268,7 +289,7 @@ class ChatRoomState extends State<ChatRoom> {
         height: size.height / 2.5,
         width: size.width,
         padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
-        alignment: map['sendby'] == auth.currentUser!.displayName
+        alignment: map['sendBy'] == auth.currentUser!.displayName
             ? Alignment.centerRight
             : Alignment.centerLeft,
         child: InkWell(
@@ -303,7 +324,7 @@ class ChatRoomState extends State<ChatRoom> {
 class ShowImage extends StatelessWidget {
   final String imageUrl;
 
-  const ShowImage({required this.imageUrl, Key? key}) : super(key: key);
+  const ShowImage({required this.imageUrl, super.key});
 
   @override
   Widget build(BuildContext context) {

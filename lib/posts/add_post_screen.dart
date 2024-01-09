@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:io';
 import 'dart:math';
 
@@ -11,7 +13,7 @@ import '../data/bd_districts.dart';
 import '../widget/initialize_current_user.dart';
 
 class AddPostScreen extends StatefulWidget {
-  const AddPostScreen({Key? key}) : super(key: key);
+  const AddPostScreen({super.key});
 
   @override
   State<AddPostScreen> createState() => _AddPostScreenState();
@@ -22,7 +24,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
   String selectedDistricts = 'Chattogram';
   bool isLoading = false;
   String imageUrl = ' ';
-  List<File> _selectedImages = [];
+  final List<File> _selectedImages = [];
 
   final TextEditingController titleController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
@@ -51,7 +53,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
     try {
       if (AuthService.currentUser == null ||
           AuthService.currentUser!.email == null) {
-        print('User or email is null');
+        debugPrint('User or email is null');
         return;
       }
 
@@ -115,7 +117,6 @@ class _AddPostScreenState extends State<AddPostScreen> {
       setState(() {
         isLoading = false;
       });
-      print(e);
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         behavior: SnackBarBehavior.floating,
         backgroundColor: Colors.red,
@@ -136,7 +137,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
-          title: Text("Create Post"),
+          title: const Text("Create Post"),
         ),
         body: ModalProgressHUD(
           inAsyncCall: isLoading,
@@ -165,13 +166,13 @@ class _AddPostScreenState extends State<AddPostScreen> {
                                 return Stack(
                                   children: [
                                     Container(
-                                      margin: EdgeInsets.only(right: 8.0),
+                                      margin: const EdgeInsets.only(right: 8.0),
                                       height: size.height * 0.09,
                                       width: size.width * 0.2,
                                       decoration: BoxDecoration(
                                         border: Border.all(
                                           width: 2,
-                                          color: Color(0xFF39b54a),
+                                          color: const Color(0xFF39b54a),
                                         ),
                                         borderRadius: BorderRadius.circular(5),
                                       ),
@@ -190,7 +191,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                                           });
                                         },
                                         icon: Container(
-                                          decoration: BoxDecoration(
+                                          decoration: const BoxDecoration(
                                             boxShadow: [
                                               BoxShadow(
                                                 color: Colors.white,
@@ -201,7 +202,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                                             ],
                                             shape: BoxShape.circle,
                                           ),
-                                          child: Icon(
+                                          child: const Icon(
                                             Icons.cancel,
                                             color: Colors.redAccent,
                                           ),
@@ -212,7 +213,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                                 );
                               }).toList(),
                             ),
-                          SizedBox(
+                          const SizedBox(
                             width: 10,
                           ),
                           GestureDetector(
@@ -267,11 +268,11 @@ class _AddPostScreenState extends State<AddPostScreen> {
                                 decoration: BoxDecoration(
                                   border: Border.all(
                                     width: 2,
-                                    color: Color(0xFF39b54a),
+                                    color: const Color(0xFF39b54a),
                                   ),
                                   borderRadius: BorderRadius.circular(5),
                                 ),
-                                child: Icon(
+                                child: const Icon(
                                   Icons.camera_alt,
                                   color: Color(0xFF39b54a),
                                 ),
@@ -279,13 +280,13 @@ class _AddPostScreenState extends State<AddPostScreen> {
                         ],
                       ),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 20,
                     ),
                     TextFormField(
                       controller: titleController,
                       maxLength: 100,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         border: OutlineInputBorder(),
                         labelText: "Title",
                       ),
@@ -299,7 +300,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                     TextFormField(
                       controller: descriptionController,
                       maxLength: 1000,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         border: OutlineInputBorder(),
                         labelText: "Description",
                       ),
@@ -311,7 +312,8 @@ class _AddPostScreenState extends State<AddPostScreen> {
                       },
                     ),
                     Container(
-                      constraints: BoxConstraints(maxWidth: double.infinity),
+                      constraints:
+                          const BoxConstraints(maxWidth: double.infinity),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -319,7 +321,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                             child: TextFormField(
                               controller: foodTypeController,
                               maxLength: 50,
-                              decoration: InputDecoration(
+                              decoration: const InputDecoration(
                                 border: OutlineInputBorder(),
                                 labelText: "Food Type",
                               ),
@@ -331,13 +333,13 @@ class _AddPostScreenState extends State<AddPostScreen> {
                               },
                             ),
                           ),
-                          SizedBox(width: 10),
+                          const SizedBox(width: 10),
                           Expanded(
                             child: TextFormField(
                               controller: quantityController,
                               keyboardType: TextInputType.number,
                               maxLength: 5,
-                              decoration: InputDecoration(
+                              decoration: const InputDecoration(
                                 border: OutlineInputBorder(),
                                 labelText: "Quantity",
                               ),
@@ -356,7 +358,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                       controller: mobileController,
                       maxLength: 11,
                       keyboardType: TextInputType.phone,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         border: OutlineInputBorder(),
                         labelText: "Mobile",
                       ),
@@ -370,7 +372,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                     TextFormField(
                       controller: addressController,
                       maxLength: 150,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         border: OutlineInputBorder(),
                         labelText: "Address",
                       ),
@@ -382,7 +384,8 @@ class _AddPostScreenState extends State<AddPostScreen> {
                       },
                     ),
                     Container(
-                      constraints: BoxConstraints(maxWidth: double.infinity),
+                      constraints:
+                          const BoxConstraints(maxWidth: double.infinity),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -391,7 +394,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                               controller: postCodeController,
                               maxLength: 4,
                               keyboardType: TextInputType.number,
-                              decoration: InputDecoration(
+                              decoration: const InputDecoration(
                                 border: OutlineInputBorder(),
                                 labelText: "Post Code",
                               ),
@@ -403,13 +406,13 @@ class _AddPostScreenState extends State<AddPostScreen> {
                               },
                             ),
                           ),
-                          SizedBox(width: 10),
+                          const SizedBox(width: 10),
                           Expanded(
                             child: TextFormField(
                               controller: postOfficeController,
                               maxLength: 50,
                               keyboardType: TextInputType.text,
-                              decoration: InputDecoration(
+                              decoration: const InputDecoration(
                                 border: OutlineInputBorder(),
                                 labelText: "Post Office",
                               ),
@@ -424,13 +427,14 @@ class _AddPostScreenState extends State<AddPostScreen> {
                         ],
                       ),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 10,
                     ),
                     Container(
-                      constraints: BoxConstraints(maxWidth: double.infinity),
+                      constraints:
+                          const BoxConstraints(maxWidth: double.infinity),
                       child: DropdownButtonFormField<String>(
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           border: OutlineInputBorder(),
                           labelText: 'Select Districts',
                         ),
@@ -454,7 +458,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                         },
                       ),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 10,
                     ),
                     Center(
@@ -482,11 +486,11 @@ class _AddPostScreenState extends State<AddPostScreen> {
                           }
                         },
                         style: ElevatedButton.styleFrom(
-                          shape: RoundedRectangleBorder(
+                          shape: const RoundedRectangleBorder(
                             borderRadius: BorderRadius.zero,
                           ),
                         ),
-                        child: Text('Post'),
+                        child: const Text('Post'),
                       ),
                     ),
                   ],

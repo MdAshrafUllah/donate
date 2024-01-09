@@ -14,7 +14,7 @@ class PostService {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text(
+          title: const Text(
             "Do you want to Delete this post?",
             style: TextStyle(color: Colors.black, fontSize: 18),
           ),

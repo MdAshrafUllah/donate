@@ -37,15 +37,13 @@ Widget buildPage({
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Container(
-            child: Text(
-              subtitle,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.black45,
-                fontSize: size.height * 0.02,
-                fontWeight: FontWeight.bold,
-              ),
+          child: Text(
+            subtitle,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.black45,
+              fontSize: size.height * 0.02,
+              fontWeight: FontWeight.bold,
             ),
           ),
         )

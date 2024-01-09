@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import '../auth/login_screen.dart';
-import 'onboard_page_mathod.dart';
+import 'onboard_page_method.dart';
 
 class OnboardingScreen extends StatefulWidget {
-  OnboardingScreen({super.key});
+  const OnboardingScreen({super.key});
 
   @override
   State<OnboardingScreen> createState() => _OnboardingScreenState();
@@ -68,13 +68,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10)),
-                          backgroundColor: Color(0xFF39b54a),
+                          backgroundColor: const Color(0xFF39b54a),
                           minimumSize: Size.fromHeight(size.height * 0.08)),
                       onPressed: () {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => LoginScreen()),
+                              builder: (context) => const LoginScreen()),
                         );
                       },
                       child: Text(
@@ -97,7 +97,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             style: TextStyle(
                                 fontSize: size.width / 24,
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xFF39b54a)))),
+                                color: const Color(0xFF39b54a)))),
                     Center(
                       child: SmoothPageIndicator(
                         controller: controller,
@@ -119,7 +119,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         child: Text(
                           'Next',
                           style: TextStyle(
-                              color: Color(0xFF39b54a),
+                              color: const Color(0xFF39b54a),
                               fontSize: size.width / 24,
                               fontWeight: FontWeight.bold),
                         ))

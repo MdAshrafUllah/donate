@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:utsargo/widget/initialize_current_user.dart';
@@ -40,7 +42,7 @@ class _FoodDeliverState extends State<FoodDeliver> {
         await fetchPostTitlesAndImages();
       }
     } catch (e) {
-      print('Error fetching post owner\'s deliver list: $e');
+      debugPrint('Error fetching post owner\'s deliver list: $e');
     }
   }
 
@@ -84,7 +86,7 @@ class _FoodDeliverState extends State<FoodDeliver> {
           .delete();
       await fetchDeliveryList();
     } catch (e) {
-      print('Error canceling request: $e');
+      debugPrint('Error canceling request: $e');
     }
   }
 
@@ -114,20 +116,46 @@ class _FoodDeliverState extends State<FoodDeliver> {
       Navigator.pushReplacementNamed(context, "/navigationScreen",
           arguments: 1);
     } catch (e) {
-      print("Error creating contact: $e");
+      debugPrint("Error creating contact: $e");
+    }
+  }
+
+  Future<void> saveProductDetails(String senderId, String postId) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(AuthService.currentUser!.uid)
+          .collection('forDonate')
+          .add({
+        'senderId': senderId,
+        'postId': postId,
+      });
+
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(senderId)
+          .collection('forDeliver')
+          .add({
+        'senderId': AuthService.currentUser!.uid,
+        'postId': postId,
+      });
+    } catch (e) {
+      debugPrint('Error saving product details: $e');
+      rethrow;
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
     return SafeArea(
       child: Scaffold(
           appBar: AppBar(
             title: const Text("Food Deliver"),
           ),
           body: deliveryList.isEmpty
-              ? Center(
-                  child: Text("You don't have Delivery Data"),
+              ? const Center(
+                  child: Text("You don't have Delivers Data"),
                 )
               : Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -154,20 +182,26 @@ class _FoodDeliverState extends State<FoodDeliver> {
                             children: [
                               ElevatedButton(
                                 onPressed: () async {
-                                  createContact(
-                                      senderId,
-                                      senderNames[senderId].toString(),
-                                      senderId);
+                                  String senderId =
+                                      deliveryList[index]['senderId'];
+                                  String postId = deliveryList[index]['postId'];
+                                  try {
+                                    await saveProductDetails(senderId, postId);
+                                  } catch (e) {
+                                    debugPrint(
+                                        'Error accepting request and saving product details: $e');
+                                  }
                                   await cancelRequest(deliveryList[index].id);
+                                  Navigator.pushNamed(context, '/donateList');
                                 },
                                 style: ElevatedButton.styleFrom(
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(5),
                                   ),
                                 ),
-                                child: Text('Accept'),
+                                child: const Text('Accept'),
                               ),
-                              SizedBox(width: 8),
+                              const SizedBox(width: 8),
                               ElevatedButton(
                                 onPressed: () {
                                   cancelRequest(deliveryList[index].id);
@@ -177,8 +211,21 @@ class _FoodDeliverState extends State<FoodDeliver> {
                                       borderRadius: BorderRadius.circular(5),
                                     ),
                                     backgroundColor: Colors.red),
-                                child: Text('Cancel'),
+                                child: const Text('Cancel'),
                               ),
+                              IconButton(
+                                onPressed: () {
+                                  createContact(
+                                      senderId,
+                                      senderNames[senderId].toString(),
+                                      senderId);
+                                },
+                                icon: Icon(
+                                  Icons.chat,
+                                  size: size.width * 0.1,
+                                ),
+                                color: const Color(0xFF39b54a),
+                              )
                             ],
                           ),
                         ),

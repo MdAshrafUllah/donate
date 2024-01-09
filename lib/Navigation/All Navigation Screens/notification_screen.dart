@@ -1,10 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 
 import '../../widget/initialize_current_user.dart';
 
 class NotificationScreen extends StatefulWidget {
-  const NotificationScreen({Key? key});
+  const NotificationScreen({super.key});
 
   @override
   State<NotificationScreen> createState() => _NotificationScreenState();
@@ -16,16 +17,19 @@ class _NotificationScreenState extends State<NotificationScreen> {
   late Map<String, String> senderNames = {};
   late Map<String, String> postTitles = {};
   late Map<String, String> postsImages = {};
+  bool isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    fetchDeliveryList();
-    fetchReceiverList();
+    fetchNotificationList();
   }
 
-  Future<void> fetchDeliveryList() async {
+  Future<void> fetchNotificationList() async {
     try {
+      setState(() {
+        isLoading = true;
+      });
       if (AuthService.currentUser != null) {
         final currentUserId = AuthService.currentUser!.uid;
 
@@ -35,22 +39,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
             .collection('Deliver')
             .get();
 
-        setState(() {
-          deliveryList = deliverySnapshot.docs;
-        });
-
-        await fetchNotificationsInfo(deliveryList);
-      }
-    } catch (e) {
-      print('Error fetching delivery notifications: $e');
-    }
-  }
-
-  Future<void> fetchReceiverList() async {
-    try {
-      if (AuthService.currentUser != null) {
-        final currentUserId = AuthService.currentUser!.uid;
-
         QuerySnapshot receiverSnapshot = await FirebaseFirestore.instance
             .collection('users')
             .doc(currentUserId)
@@ -58,13 +46,17 @@ class _NotificationScreenState extends State<NotificationScreen> {
             .get();
 
         setState(() {
+          deliveryList = deliverySnapshot.docs;
           receiverList = receiverSnapshot.docs;
         });
-
+        await fetchNotificationsInfo(deliveryList);
         await fetchNotificationsInfo(receiverList);
       }
+      setState(() {
+        isLoading = false;
+      });
     } catch (e) {
-      print('Error fetching received notifications: $e');
+      debugPrint('Error fetching delivery notifications: $e');
     }
   }
 
@@ -97,95 +89,109 @@ class _NotificationScreenState extends State<NotificationScreen> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        body: deliveryList.isEmpty && receiverList.isEmpty
-            ? Center(
-                child: Text("You don't have any Notifications"),
-              )
-            : ListView(
-                children: [
-                  if (deliveryList.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.pushNamed(context, "/foodDeliver");
-                            },
-                            child: ListView.builder(
-                              shrinkWrap: true,
-                              physics: NeverScrollableScrollPhysics(),
-                              itemCount: deliveryList.length,
-                              itemBuilder: (context, index) {
-                                String senderId =
-                                    deliveryList[index]['senderId'];
-                                String postId = deliveryList[index]['postId'];
-                                return ListTile(
-                                  leading: Image.network(
-                                    postsImages[postId] ??
-                                        'https://via.placeholder.com/150',
-                                    errorBuilder: (BuildContext context,
-                                        Object exception,
-                                        StackTrace? stackTrace) {
-                                      return const Icon(Icons.error);
-                                    },
-                                  ),
-                                  title: Text(
-                                      "${senderNames[senderId]} wants to deliver your food"),
-                                  subtitle:
-                                      Text('Post Title: ${postTitles[postId]}'),
-                                );
-                              },
-                            ),
-                          ),
-                          const Divider()
-                        ],
-                      ),
+        body: ModalProgressHUD(
+          inAsyncCall: isLoading,
+          child: RefreshIndicator(
+            onRefresh: () async {
+              setState(() {});
+              return Future<void>.delayed(const Duration(seconds: 1));
+            },
+            child: deliveryList.isEmpty && receiverList.isEmpty
+                ? const Padding(
+                    padding: EdgeInsets.only(top: 100),
+                    child: Center(
+                      child: Text("You don't have any Notifications"),
                     ),
-                  if (receiverList.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(left: 8, right: 8),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.pushNamed(context, "/foodReceiver");
-                            },
-                            child: ListView.builder(
-                              shrinkWrap: true,
-                              physics: NeverScrollableScrollPhysics(),
-                              itemCount: receiverList.length,
-                              itemBuilder: (context, index) {
-                                String senderId =
-                                    receiverList[index]['senderId'];
-                                String postId = receiverList[index]['postId'];
+                  )
+                : ListView(
+                    children: [
+                      if (deliveryList.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.pushNamed(context, "/foodDeliver");
+                                },
+                                child: ListView.builder(
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemCount: deliveryList.length,
+                                  itemBuilder: (context, index) {
+                                    String senderId =
+                                        deliveryList[index]['senderId'];
+                                    String postId =
+                                        deliveryList[index]['postId'];
+                                    return ListTile(
+                                      leading: Image.network(
+                                        postsImages[postId] ??
+                                            'https://via.placeholder.com/150',
+                                        errorBuilder: (BuildContext context,
+                                            Object exception,
+                                            StackTrace? stackTrace) {
+                                          return const Icon(Icons.error);
+                                        },
+                                      ),
+                                      title: Text(
+                                          "${senderNames[senderId]} wants to deliver your food"),
+                                      subtitle: Text(
+                                          'Post Title: ${postTitles[postId]}'),
+                                    );
+                                  },
+                                ),
+                              ),
+                              const Divider()
+                            ],
+                          ),
+                        ),
+                      if (receiverList.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8, right: 8),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.pushNamed(context, "/foodReceiver");
+                                },
+                                child: ListView.builder(
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemCount: receiverList.length,
+                                  itemBuilder: (context, index) {
+                                    String senderId =
+                                        receiverList[index]['senderId'];
+                                    String postId =
+                                        receiverList[index]['postId'];
 
-                                return ListTile(
-                                  leading: Image.network(
-                                    postsImages[postId] ??
-                                        'https://via.placeholder.com/150',
-                                    errorBuilder: (BuildContext context,
-                                        Object exception,
-                                        StackTrace? stackTrace) {
-                                      return const Icon(Icons.error);
-                                    },
-                                  ),
-                                  title: Text(
-                                      "${senderNames[senderId]} wants to receive your food"),
-                                  subtitle:
-                                      Text('Post Title: ${postTitles[postId]}'),
-                                );
-                              },
-                            ),
+                                    return ListTile(
+                                      leading: Image.network(
+                                        postsImages[postId] ??
+                                            'https://via.placeholder.com/150',
+                                        errorBuilder: (BuildContext context,
+                                            Object exception,
+                                            StackTrace? stackTrace) {
+                                          return const Icon(Icons.error);
+                                        },
+                                      ),
+                                      title: Text(
+                                          "${senderNames[senderId]} wants to receive your food"),
+                                      subtitle: Text(
+                                          'Post Title: ${postTitles[postId]}'),
+                                    );
+                                  },
+                                ),
+                              ),
+                              const Divider()
+                            ],
                           ),
-                          const Divider()
-                        ],
-                      ),
-                    ),
-                ],
-              ),
+                        ),
+                    ],
+                  ),
+          ),
+        ),
       ),
     );
   }

@@ -1,4 +1,4 @@
-// ignore_for_file: library_private_types_in_public_api
+// ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -6,13 +6,15 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 
-class SignupScreen extends StatefulWidget {
-  const SignupScreen({super.key});
+import '../widget/connection_checker.dart';
+
+class SignUpScreen extends StatefulWidget {
+  const SignUpScreen({super.key});
   @override
-  _SignupScreenState createState() => _SignupScreenState();
+  _SignUpScreenState createState() => _SignUpScreenState();
 }
 
-class _SignupScreenState extends State<SignupScreen> {
+class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -48,12 +50,12 @@ class _SignupScreenState extends State<SignupScreen> {
         //     .doc(userId)
         //     .collection("deliver")
         //     .add({});
-        print('User data added successfully');
+        debugPrint('User data added successfully');
       } else {
-        print('User is not authenticated');
+        debugPrint('User is not authenticated');
       }
     } catch (e) {
-      print('Error adding user data: $e');
+      debugPrint('Error adding user data: $e');
     }
   }
 
@@ -352,6 +354,9 @@ class _SignupScreenState extends State<SignupScreen> {
                     } else if (_nameController.text != "" &&
                         _emailController.text != "" &&
                         _passwordController.text != "") {
+                      ConnectionChecker.checkAndNavigate(
+                        context: context,
+                      );
                       setState(() {
                         showSpinner = true;
                       });

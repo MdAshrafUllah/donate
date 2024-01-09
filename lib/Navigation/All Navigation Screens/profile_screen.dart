@@ -4,15 +4,17 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:utsargo/widget/initialize_current_user.dart';
+
+import '../../data/drd_total_data.dart';
+import '../../widget/active_status.dart';
+import '../../widget/clear_catch.dart';
+import '../../widget/initialize_current_user.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -28,6 +30,9 @@ String name = '';
 
 class _ProfileScreenState extends State<ProfileScreen> {
   bool isLoading = false;
+  List<QueryDocumentSnapshot> completeDonateList = [];
+  List<QueryDocumentSnapshot> completeReceivedList = [];
+  List<QueryDocumentSnapshot> completeDeliveredList = [];
 
   @override
   void initState() {
@@ -41,6 +46,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
         setState(() {
           isLoading = true;
         });
+
+        completeDonateList =
+            await FirestoreManager.fetchCompleteList('complete Donate');
+        completeReceivedList =
+            await FirestoreManager.fetchCompleteList('complete Received');
+        completeDeliveredList =
+            await FirestoreManager.fetchCompleteList('complete Deliver');
+
+        setState(() {});
+
         final querySnapshot = await FirebaseFirestore.instance
             .collection('users')
             .where('email', isEqualTo: AuthService.currentUser!.email)
@@ -333,7 +348,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           style: TextStyle(fontSize: size.width * 0.045),
                         ),
                         Text(
-                          "00",
+                          completeDonateList.length.toString(),
                           style: TextStyle(
                               fontSize: size.width * 0.05,
                               fontWeight: FontWeight.bold),
@@ -353,7 +368,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           style: TextStyle(fontSize: size.width * 0.045),
                         ),
                         Text(
-                          "00",
+                          completeReceivedList.length.toString(),
                           style: TextStyle(
                               fontSize: size.width * 0.05,
                               fontWeight: FontWeight.bold),
@@ -373,7 +388,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           style: TextStyle(fontSize: size.width * 0.045),
                         ),
                         Text(
-                          "00",
+                          completeDeliveredList.length.toString(),
                           style: TextStyle(
                               fontSize: size.width * 0.05,
                               fontWeight: FontWeight.bold),
@@ -444,6 +459,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         child: Row(
                           children: [
                             Icon(
+                              Icons.call_received,
+                              size: size.width / 12,
+                              color: const Color(0xFF39b54a),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pushNamed(context, "/receiverList");
+                              },
+                              child: Text('Received Food List',
+                                  style: TextStyle(
+                                      fontSize: size.width / 22,
+                                      color: Colors.black54)),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      SizedBox(
+                        child: Row(
+                          children: [
+                            Icon(
                               Icons.pedal_bike,
                               size: size.width / 12,
                               color: const Color(0xFF39b54a),
@@ -453,6 +492,54 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 Navigator.pushNamed(context, '/foodDeliver');
                               },
                               child: Text('Food Deliver',
+                                  style: TextStyle(
+                                      fontSize: size.width / 22,
+                                      color: Colors.black54)),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      SizedBox(
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.arrow_forward,
+                              size: size.width / 12,
+                              color: const Color(0xFF39b54a),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pushNamed(context, "/deliveryList");
+                              },
+                              child: Text('Food Delivered List',
+                                  style: TextStyle(
+                                      fontSize: size.width / 22,
+                                      color: Colors.black54)),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      SizedBox(
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.arrow_outward,
+                              size: size.width / 12,
+                              color: const Color(0xFF39b54a),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pushNamed(context, "/donateList");
+                              },
+                              child: Text('Food Donate List',
                                   style: TextStyle(
                                       fontSize: size.width / 22,
                                       color: Colors.black54)),
@@ -522,8 +609,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               color: const Color(0xFF39b54a),
                             ),
                             TextButton(
-                              onPressed: () {},
-                              child: Text('Privacy & Security',
+                              onPressed: () {
+                                Navigator.pushNamed(
+                                    context, "/privacyAndSecurity");
+                              },
+                              child: Text('Terms and Conditions',
                                   style: TextStyle(
                                       fontSize: size.width / 22,
                                       color: Colors.black54)),
@@ -548,21 +638,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                             TextButton(
                               onPressed: () async {
-                                // setStatus("Offline");
-                                DefaultCacheManager manager =
-                                    DefaultCacheManager();
-                                manager.emptyCache();
-                                Future<void> deleteAppDir() async {
-                                  Directory appDocDir =
-                                      await getApplicationDocumentsDirectory();
-
-                                  if (appDocDir.existsSync()) {
-                                    appDocDir.deleteSync(recursive: true);
-                                  }
-                                }
-
+                                statusOffline();
+                                deleteCacheDir();
+                                deleteAppDir();
                                 await FirebaseAuth.instance.signOut();
-                                Navigator.pushNamed(context, '/loginScreen');
+                                Navigator.pushNamed(context, '/');
                               },
                               child: Text('Logout',
                                   style: TextStyle(

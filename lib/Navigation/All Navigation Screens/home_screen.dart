@@ -1,9 +1,10 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../posts/item_details_page.dart';
-import '../../widget/connection_checker.dart';
 import '../../widget/initialize_current_user.dart';
 import '../../widget/post_delete_services.dart';
 
@@ -188,9 +189,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    ConnectionChecker.checkAndNavigate(
-      context: context,
-    );
     fetchSavedPosts();
     return Scaffold(
       body: Padding(
@@ -255,145 +253,157 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             Expanded(
               child: RefreshIndicator(
-                color: const Color(0xFF39b54a),
                 onRefresh: _handleRefresh,
-                child: GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2),
-                  itemCount: listItem.length,
-                  itemBuilder: (context, index) {
-                    Map<String, dynamic> currentItem = listItem[index];
+                child: listItem.isEmpty
+                    ? const Center(
+                        child: CircularProgressIndicator(),
+                      )
+                    : GridView.builder(
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2),
+                        itemCount: listItem.length,
+                        itemBuilder: (context, index) {
+                          Map<String, dynamic> currentItem = listItem[index];
 
-                    return GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ItemDetailsScreen(
-                              listItem: {'productId': currentItem['productId']},
-                            ),
-                          ),
-                        );
-                      },
-                      child: Card(
-                        elevation: 0,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              height: size.height / 6.5,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(
-                                    width: 2, color: const Color(0xFF39b54a)),
-                                image: DecorationImage(
-                                  image: NetworkImage(currentItem["image"]),
-                                  fit: BoxFit.cover,
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ItemDetailsScreen(
+                                    listItem: {
+                                      'productId': currentItem['productId']
+                                    },
+                                  ),
                                 ),
-                              ),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                crossAxisAlignment: CrossAxisAlignment.end,
+                              );
+                            },
+                            child: Card(
+                              elevation: 0,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: MaterialButton(
-                                      onPressed: () {
-                                        setState(() {
-                                          currentItem["isSaved"] =
-                                              !currentItem["isSaved"];
-                                        });
-                                        savePost(currentItem);
-                                      },
-                                      color: Colors.white,
-                                      height: size.height * 0.04,
-                                      minWidth: size.width * 0.085,
-                                      padding: const EdgeInsets.all(0),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8),
+                                  Container(
+                                    height: size.height / 6.5,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(
+                                          width: 2,
+                                          color: const Color(0xFF39b54a)),
+                                      image: DecorationImage(
+                                        image:
+                                            NetworkImage(currentItem["image"]),
+                                        fit: BoxFit.cover,
                                       ),
-                                      child: Icon(
-                                        currentItem["isSaved"]
-                                            ? Icons.bookmark
-                                            : Icons.bookmark_border,
-                                        size: size.height * 0.03,
-                                        color: currentItem["isSaved"]
-                                            ? const Color(0xFF39b54a)
-                                            : Colors.black,
-                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.end,
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: MaterialButton(
+                                            onPressed: () {
+                                              setState(() {
+                                                currentItem["isSaved"] =
+                                                    !currentItem["isSaved"];
+                                              });
+                                              savePost(currentItem);
+                                            },
+                                            color: Colors.white,
+                                            height: size.height * 0.04,
+                                            minWidth: size.width * 0.085,
+                                            padding: const EdgeInsets.all(0),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                            ),
+                                            child: Icon(
+                                              currentItem["isSaved"]
+                                                  ? Icons.bookmark
+                                                  : Icons.bookmark_border,
+                                              size: size.height * 0.03,
+                                              color: currentItem["isSaved"]
+                                                  ? const Color(0xFF39b54a)
+                                                  : Colors.black,
+                                            ),
+                                          ),
+                                        ),
+                                        if (AuthService.currentUser != null &&
+                                            AuthService.currentUser!.email ==
+                                                currentItem['email'])
+                                          Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: MaterialButton(
+                                              onPressed: () async {
+                                                await PostService
+                                                    .showConfirmationDialog(
+                                                  context: context,
+                                                  title: currentItem['title'],
+                                                  content:
+                                                      currentItem['productId'],
+                                                  deletePostList:
+                                                      _handleRefresh,
+                                                );
+                                              },
+                                              color: Colors.white,
+                                              height: size.height * 0.04,
+                                              minWidth: size.width * 0.085,
+                                              padding: const EdgeInsets.all(0),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                              ),
+                                              child: Icon(
+                                                Icons.more_vert,
+                                                size: size.height * 0.03,
+                                                color: Colors.black,
+                                              ),
+                                            ),
+                                          ),
+                                      ],
                                     ),
                                   ),
-                                  if (AuthService.currentUser != null &&
-                                      AuthService.currentUser!.email ==
-                                          currentItem['email'])
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: MaterialButton(
-                                        onPressed: () async {
-                                          await PostService
-                                              .showConfirmationDialog(
-                                            context: context,
-                                            title: currentItem['title'],
-                                            content: currentItem['productId'],
-                                            deletePostList: _handleRefresh,
-                                          );
-                                        },
-                                        color: Colors.white,
-                                        height: size.height * 0.04,
-                                        minWidth: size.width * 0.085,
-                                        padding: const EdgeInsets.all(0),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                        ),
-                                        child: Icon(
-                                          Icons.more_vert,
-                                          size: size.height * 0.03,
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.location_on,
+                                        color: const Color(0xFF39b54a),
+                                        size: size.width * 0.035,
+                                      ),
+                                      Text(
+                                        currentItem["subtitle"],
+                                        style: TextStyle(
+                                          fontSize: size.width * 0.035,
                                           color: Colors.black,
                                         ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
+                                    ],
+                                  ),
+                                  Expanded(
+                                    child: Text(
+                                      currentItem["title"],
+                                      style: TextStyle(
+                                        fontSize: size.width * 0.045,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black,
+                                        height: 1,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
+                                  ),
                                 ],
                               ),
                             ),
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.location_on,
-                                  color: const Color(0xFF39b54a),
-                                  size: size.width * 0.035,
-                                ),
-                                Text(
-                                  currentItem["subtitle"],
-                                  style: TextStyle(
-                                    fontSize: size.width * 0.035,
-                                    color: Colors.black,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                            ),
-                            Expanded(
-                              child: Text(
-                                currentItem["title"],
-                                style: TextStyle(
-                                  fontSize: size.width * 0.045,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
-                                  height: 1,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
+                          );
+                        },
                       ),
-                    );
-                  },
-                ),
               ),
             ),
           ],
