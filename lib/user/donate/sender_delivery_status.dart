@@ -37,9 +37,9 @@ class _SenderDeliveryStatusState extends State<SenderDeliveryStatus> {
         body: Padding(
           padding: const EdgeInsets.only(left: 8.0, right: 8.0, top: 25),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Row(
+              Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   SizedBox(
@@ -52,9 +52,13 @@ class _SenderDeliveryStatusState extends State<SenderDeliveryStatus> {
                   ),
                   Text(
                     widget.foodTitle,
+                    textAlign: TextAlign.center,
                     style: TextStyle(fontSize: size.width * 0.05),
                   )
                 ],
+              ),
+              const SizedBox(
+                height: 25,
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,

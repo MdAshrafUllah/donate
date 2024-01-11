@@ -129,6 +129,10 @@ class _DonateListState extends State<DonateList> {
                             child: ListTile(
                               leading: Image.network(
                                 postImage,
+                                errorBuilder: (BuildContext context,
+                                    Object exception, StackTrace? stackTrace) {
+                                  return const Icon(Icons.error);
+                                },
                               ),
                               title: Text(postTitle),
                               trailing: const Icon(

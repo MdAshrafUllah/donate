@@ -178,10 +178,10 @@ class _FoodDeliverState extends State<FoodDeliver> {
                           title: Text(
                               "${senderNames[senderId]} Want to Deliver Your Food"),
                           subtitle: Row(
-                            mainAxisSize: MainAxisSize.min,
+                            // mainAxisSize: MainAxisSize.min,
                             children: [
-                              ElevatedButton(
-                                onPressed: () async {
+                              GestureDetector(
+                                onTap: () async {
                                   String senderId =
                                       deliveryList[index]['senderId'];
                                   String postId = deliveryList[index]['postId'];
@@ -194,37 +194,51 @@ class _FoodDeliverState extends State<FoodDeliver> {
                                   await cancelRequest(deliveryList[index].id);
                                   Navigator.pushNamed(context, '/donateList');
                                 },
-                                style: ElevatedButton.styleFrom(
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(5),
-                                  ),
+                                child: Container(
+                                  height: 40,
+                                  width: size.width / 4.5,
+                                  decoration: BoxDecoration(
+                                      color: Colors.green,
+                                      borderRadius: BorderRadius.circular(5)),
+                                  child: const Center(
+                                      child: Text(
+                                    'Accept',
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold),
+                                  )),
                                 ),
-                                child: const Text('Accept'),
                               ),
                               const SizedBox(width: 8),
-                              ElevatedButton(
-                                onPressed: () {
+                              GestureDetector(
+                                onTap: () {
                                   cancelRequest(deliveryList[index].id);
                                 },
-                                style: ElevatedButton.styleFrom(
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(5),
-                                    ),
-                                    backgroundColor: Colors.red),
-                                child: const Text('Cancel'),
+                                child: Container(
+                                  height: 40,
+                                  width: size.width / 4.5,
+                                  decoration: BoxDecoration(
+                                      color: Colors.red,
+                                      borderRadius: BorderRadius.circular(5)),
+                                  child: const Center(
+                                      child: Text(
+                                    'Cancel',
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold),
+                                  )),
+                                ),
                               ),
-                              IconButton(
-                                onPressed: () {
+                              const Spacer(),
+                              InkWell(
+                                onTap: () {
                                   createContact(
                                       senderId,
                                       senderNames[senderId].toString(),
                                       senderId);
                                 },
-                                icon: Icon(
-                                  Icons.chat,
-                                  size: size.width * 0.1,
-                                ),
-                                color: const Color(0xFF39b54a),
+                                child: const Icon(Icons.chat,
+                                    size: 28, color: Color(0xFF39b54a)),
                               )
                             ],
                           ),
